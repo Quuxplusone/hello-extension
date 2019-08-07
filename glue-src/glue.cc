@@ -1,5 +1,7 @@
 #include <Python.h>
+#include <cassert>
 #include <string>
+#include <vector>
 #include "core-src/hello.h"
 
 static PyObject *
@@ -33,6 +35,51 @@ get_personalized_greeting(PyObject *self, PyObject *args)
     return Py_BuildValue("s#", result.data(), result.size());
 }
 
+static PyObject *
+greet_each(PyObject *self, PyObject *args)
+{
+    // https://stackoverflow.com/a/42868330/1424877
+    PyObject *py_list = nullptr;
+    if (PyArg_ParseTuple(args, "O!", &PyList_Type, &py_list)) {
+        // pass
+    } else {
+        // `PyArg_ParseTuple` has already taken care of setting up the
+        // appropriate exception to be raised in this case.
+        return nullptr;
+    }
+
+    // Convert the Python list of strings into a C++ vector of strings.
+    // In a real project, this should almost certainly be factored out
+    // into a helper function. We inline it here for teaching purposes.
+
+    std::vector<std::string> cpp_list;
+    const int len = PyList_Size(py_list);
+    for (int i=0; i < len; ++i) {
+        PyObject *elt = PyList_GetItem(py_list, i);
+        if (!PyUnicode_Check(elt)) {
+            PyErr_Format(PyExc_TypeError, "sequence item %d: expected str instance, %s found", i, Py_TYPE(elt)->tp_name);
+            return nullptr;
+        }
+        PyObject *bytes = PyUnicode_AsUTF8String(elt);
+        const char *s = PyBytes_AsString(bytes);
+        cpp_list.push_back(s);
+        Py_DECREF(bytes);
+    }
+
+    std::vector<std::string> cpp_result = HelloWorld::greet_each(cpp_list);
+    assert(cpp_result.size() == len);
+
+    // Convert the C++ result back into a Python list of strings.
+    // In a real project, this should almost certainly be factored out
+    // into a helper function. We inline it here for teaching purposes.
+
+    PyObject *py_result = PyList_New(cpp_result.size());
+    for (int i=0; i < len; ++i) {
+        PyList_SetItem(py_result, i, Py_BuildValue("s", cpp_result[i].c_str()));
+    }
+    return py_result;
+}
+
 // `PyMODINIT_FUNC` is a macro that includes `extern "C"` already.
 PyMODINIT_FUNC PyInit_libhelloworld()
 {
@@ -41,6 +88,7 @@ PyMODINIT_FUNC PyInit_libhelloworld()
         {"raise_error", raise_error, METH_VARARGS, "Invariably raise RuntimeError."},
         {"get_hello", get_hello, METH_VARARGS, "Return the string 'hello world'."},
         {"get_personalized_greeting", get_personalized_greeting, METH_VARARGS, "Return a personalized greeting."},
+        {"greet_each", greet_each, METH_VARARGS, "Transform a list of names into a list of greetings."},
         {nullptr, nullptr, 0, nullptr},
     };
 

@@ -26,6 +26,20 @@ class TestLibHelloWorld(unittest.TestCase):
         self.assertEqual(str(e.exception), 'function takes at most 1 argument (2 given)')
         self.assertEqual(L.get_personalized_greeting.__doc__, 'Return a personalized greeting.')
 
+    def test_greet_each(self):
+        self.assertEqual(L.greet_each([]), [])
+        self.assertEqual(L.greet_each(['Arthur']), ['hello Arthur'])
+        self.assertEqual(L.greet_each(['Arthur', 'Sam']), ['hello Arthur', 'hello Sam'])
+        with self.assertRaises(TypeError) as e:
+            L.greet_each(123)
+        self.assertEqual(str(e.exception), 'argument 1 must be list, not int')
+        with self.assertRaises(TypeError) as e:
+            L.greet_each('Arthur', 'Sam')
+        self.assertEqual(str(e.exception), 'function takes exactly 1 argument (2 given)')
+        with self.assertRaises(TypeError) as e:
+            L.greet_each(['Arthur', 123])
+        self.assertEqual(str(e.exception), 'sequence item 1: expected str instance, int found')
+
     def test_raise_error(self):
         with self.assertRaises(RuntimeError):
             L.raise_error()
