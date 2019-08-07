@@ -1,0 +1,1 @@
+-e git+git://github.com/Quuxplusone/hello-extension.git@master#egg=helloworld
