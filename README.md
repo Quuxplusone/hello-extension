@@ -40,7 +40,7 @@ And now you can successfully run Python scripts that `import libhelloworld`!
 
     python example-of-use/example.py 
 
->      hello world
+>      hello user
 
 To remove the module, you can use `pip uninstall` as usual.
 

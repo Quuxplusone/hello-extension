@@ -15,6 +15,17 @@ class TestLibHelloWorld(unittest.TestCase):
         self.assertEqual(L.get_hello(123), 'hello world')
         self.assertEqual(L.get_hello('Arthur', 'Sam'), 'hello world')
 
+    def test_get_personalized_greeting(self):
+        self.assertEqual(L.get_personalized_greeting(), 'hello whoever you are')
+        self.assertEqual(L.get_personalized_greeting('Arthur'), 'hello Arthur')
+        with self.assertRaises(TypeError) as e:
+            L.get_personalized_greeting(123)
+        self.assertEqual(str(e.exception), 'argument 1 must be str, not int')
+        with self.assertRaises(TypeError) as e:
+            L.get_personalized_greeting('Arthur', 'Sam')
+        self.assertEqual(str(e.exception), 'function takes at most 1 argument (2 given)')
+        self.assertEqual(L.get_personalized_greeting.__doc__, 'Return a personalized greeting.')
+
     def test_raise_error(self):
         with self.assertRaises(RuntimeError):
             L.raise_error()

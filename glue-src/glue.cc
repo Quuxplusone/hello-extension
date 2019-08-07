@@ -1,4 +1,6 @@
 #include <Python.h>
+#include <string>
+#include "core-src/hello.h"
 
 static PyObject *
 raise_error(PyObject *self, PyObject *args)
@@ -15,6 +17,22 @@ get_hello(PyObject *self, PyObject *args)
     return Py_BuildValue("s", "hello world");
 }
 
+static PyObject *
+get_personalized_greeting(PyObject *self, PyObject *args)
+{
+    const char *who = "whoever you are";
+    if (PyArg_ParseTuple(args, "|s", &who)) {
+        // `PyArg_ParseTuple` has set `who` appropriately,
+        // or left it untouched if the user didn't provide a value.
+    } else {
+        // `PyArg_ParseTuple` has already taken care of setting up the
+        // appropriate exception to be raised in this case.
+        return nullptr;
+    }
+    std::string result = HelloWorld::get_personalized_greeting(who);
+    return Py_BuildValue("s#", result.data(), result.size());
+}
+
 // `PyMODINIT_FUNC` is a macro that includes `extern "C"` already.
 PyMODINIT_FUNC PyInit_libhelloworld()
 {
@@ -22,6 +40,7 @@ PyMODINIT_FUNC PyInit_libhelloworld()
     static constexpr PyMethodDef methods[] = {
         {"raise_error", raise_error, METH_VARARGS, "Invariably raise RuntimeError."},
         {"get_hello", get_hello, METH_VARARGS, "Return the string 'hello world'."},
+        {"get_personalized_greeting", get_personalized_greeting, METH_VARARGS, "Return a personalized greeting."},
         {nullptr, nullptr, 0, nullptr},
     };
 

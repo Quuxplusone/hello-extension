@@ -14,4 +14,4 @@ except ImportError:
     """)
     raise
 
-print(libhelloworld.get_hello())
+print(libhelloworld.get_personalized_greeting("user"))

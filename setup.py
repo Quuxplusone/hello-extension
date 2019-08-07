@@ -4,7 +4,7 @@ from distutils.core import setup, Extension
 
 setup(
     name='helloworld',
-    version='0.0.1',
+    version='0.0.2',
     install_requires=[
         # pip requirements go here; at the moment there are none
     ],
@@ -15,12 +15,16 @@ setup(
         Extension(
             'libhelloworld',
             sources=[
+                'core-src/hello.cc',
                 'glue-src/glue.cc',
             ],
             extra_compile_args=[
                 '-std=c++11',
             ],
         ),
+    ],
+    include_dirs=[
+        '.',
     ],
 
     # metadata for upload to PyPI
