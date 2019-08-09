@@ -48,6 +48,34 @@ class TestLibHelloWorld(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             L.raise_error('Arthur', 'Sam')
 
+    def test_greeter_construction(self):
+        with self.assertRaises(TypeError) as e:
+            L.Greeter('Arthur', 'Sam')
+        self.assertEqual(str(e.exception), 'function takes exactly 1 argument (2 given)')
+        x = L.Greeter('Arthur')
+        self.assertEqual(x.get_greeting(), 'hello Arthur')
+
+    def test_count_greeters(self):
+        x = L.Greeter('Arthur')
+        self.assertEqual(L.count_greeters(), 1)
+        y = L.Greeter('Sam')
+        self.assertEqual(L.count_greeters(), 2)
+        self.assertEqual(x.get_greeting(), 'hello Arthur')
+        self.assertEqual(y.get_greeting(), 'hello Sam')
+        x = y
+        self.assertEqual(L.count_greeters(), 1)
+        x = None
+        y = None
+        self.assertEqual(L.count_greeters(), 0)
+
+    def test_greeter_repr(self):
+        x = L.Greeter('Arthur')
+        self.assertEqual(str(x), 'hello Arthur')
+        self.assertEqual(repr(x), "libhelloworld.Greeter('Arthur')")
+
+    def test_greeter_metadata(self):
+        self.assertEqual(L.Greeter.__name__, 'Greeter')
+        self.assertEqual(L.Greeter.__doc__, 'An object that can store a greeting and deliver it later')
 
 if __name__ == '__main__':
     unittest.main()

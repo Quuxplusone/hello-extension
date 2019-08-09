@@ -2,7 +2,9 @@
 #include <cassert>
 #include <string>
 #include <vector>
+#include "core-src/greeter.h"
 #include "core-src/hello.h"
+#include "glue-src/greeter-py-object.h"
 
 static PyObject *
 raise_error(PyObject *self, PyObject *args)
@@ -80,6 +82,15 @@ greet_each(PyObject *self, PyObject *args)
     return py_result;
 }
 
+static PyObject *
+count_greeters(PyObject *self, PyObject *args)
+{
+    if (!PyArg_ParseTuple(args, "")) {
+        return nullptr;
+    }
+    return Py_BuildValue("i", HelloWorld::Greeter::count());
+}
+
 // `PyMODINIT_FUNC` is a macro that includes `extern "C"` already.
 PyMODINIT_FUNC PyInit_libhelloworld()
 {
@@ -89,6 +100,7 @@ PyMODINIT_FUNC PyInit_libhelloworld()
         {"get_hello", get_hello, METH_VARARGS, "Return the string 'hello world'."},
         {"get_personalized_greeting", get_personalized_greeting, METH_VARARGS, "Return a personalized greeting."},
         {"greet_each", greet_each, METH_VARARGS, "Transform a list of names into a list of greetings."},
+        {"count_greeters", count_greeters, METH_VARARGS, "Return the number of C++ Greeter objects in existence."},
         {nullptr, nullptr, 0, nullptr},
     };
 
@@ -106,5 +118,16 @@ PyMODINIT_FUNC PyInit_libhelloworld()
     };
 
     PyObject *m = PyModule_Create(&module);
+    if (m == nullptr) {
+        return nullptr;
+    }
+
+    PyObject *t = make_GreeterPyObject_type();
+    if (t == nullptr) {
+        Py_DECREF(m);
+        return nullptr;
+    }
+
+    PyModule_AddObject(m, "Greeter", t);
     return m;
 }
